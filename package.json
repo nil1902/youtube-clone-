@@ -1,0 +1,13 @@
+{
+  "name": "yt-clone-unified-master",
+  "version": "1.0.0",
+  "description": "Unified Frontend + Backend Full Stack Node Server",
+  "scripts": {
+    "postinstall": "npm install --prefix frontend && npm install --prefix backend",
+    "build": "npm run build --prefix frontend && npm install -g typescript && tsc --project backend/tsconfig.json",
+    "start": "node backend/dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
