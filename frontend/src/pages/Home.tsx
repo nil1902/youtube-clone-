@@ -108,7 +108,7 @@ export default function Home() {
   }, [internalQuery, page]);
 
   return (
-    <div className="flex flex-col h-full bg-[#0f0f0f] min-h-[calc(100vh-56px)] w-full mt-14 overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#0f0f0f] min-h-[calc(100vh-56px)] w-full mt-14 overflow-y-auto ipad-scroll gpu-layer">
       <div className="flex gap-3 px-4 py-3 overflow-x-auto whitespace-nowrap sticky top-0 bg-[#0f0f0f] z-40 scrollbar-hide">
         {categories.map((cat, i) => (
           <button 

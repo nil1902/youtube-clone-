@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ThumbsUp, ThumbsDown, Share, Download, MoreHorizontal, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { memo } from 'react';
 import { API_URL } from '../utils/config';
 
-const CommentThread = ({ comment }: { comment: any }) => {
+const CommentThread = memo(({ comment }: { comment: any }) => {
   const [showReplies, setShowReplies] = useState(false);
 
   return (
@@ -48,7 +49,7 @@ const CommentThread = ({ comment }: { comment: any }) => {
       </div>
     </div>
   );
-};
+});
 
 export default function Video() {
   const { id } = useParams();
@@ -112,21 +113,23 @@ export default function Video() {
   }
 
   return (
-    <div className="w-full bg-[#0f0f0f] mt-14 h-full min-h-screen pb-10">
+    <div className="w-full bg-[#0f0f0f] mt-14 h-full min-h-screen pb-10 ipad-scroll">
       <div className="grid lg:grid-cols-[1fr,380px] xl:grid-cols-[1fr,420px] gap-6 p-0 md:p-6 lg:px-8 xl:px-[5%] max-w-[2000px] mx-auto text-white">
         
         {/* Main Video Section */}
         <div className="flex flex-col gap-3 min-w-0">
           
           {/* Extremely Low Battery Drain Profile: Let YouTube hardware-accel negotiate resolution natively based on connectivity. No heavy box shadows or DOM layer drops. */}
-          <div className="w-full aspect-video bg-black md:rounded-[12px] overflow-hidden relative border-none md:border md:border-[#1a1a1a] transform-gpu">
+          <div className="w-full aspect-video bg-black md:rounded-[12px] overflow-hidden relative border-none md:border md:border-[#1a1a1a] transform-gpu shadow-none">
             <iframe 
               src={`https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&color=white`} 
               title={video.title}
+              loading="lazy"
+              sandbox="allow-scripts allow-same-origin allow-presentation"
               frameBorder="0" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
               allowFullScreen 
-              className="w-full h-full"
+              className="w-full h-full transform-gpu"
             ></iframe>
           </div>
 
@@ -219,7 +222,7 @@ export default function Video() {
               onClick={() => navigate(`/video/${video.id}`)}
             >
               <div className="w-[160px] md:w-[168px] shrink-0 aspect-video rounded-xl overflow-hidden relative border border-[#1a1a1a] transform-gpu">
-                  <img src={video.thumbnail} className="w-full h-full object-cover group-hover:scale-105 duration-300 transform-gpu"/>
+                  <img src={video.thumbnail} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 duration-300 transform-gpu"/>
                   <span className="absolute bottom-1 right-1 bg-black/90 text-[#f1f1f1] text-[11px] font-[600] px-1 rounded shadow-sm">
                      {video.duration}
                   </span>

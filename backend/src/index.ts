@@ -266,9 +266,11 @@ app.use((req, res, next) => {
   res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
-if (process.env.NODE_ENV !== 'production') {
+// Auto-start backend daemon on Standard Cloud Servers (Render, Railway, Local)
+// Bypasses daemon boot strictly inside AWS Lambda Serverless environments
+if (!process.env.LAMBDA_TASK_ROOT && !process.env.NETLIFY) {
   app.listen(port, () => {
-    console.log(`Server started on http://localhost:${port}`);
+    console.log(`Master Server running natively on port ${port}`);
   });
 }
 

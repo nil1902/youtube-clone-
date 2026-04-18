@@ -2,6 +2,32 @@
 
 body {
   @apply bg-neutral-950 text-white min-h-screen font-sans antialiased;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hardcore iPad Safari touch and paint optimizations */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+button, a, select, input {
+  touch-action: manipulation;
+}
+
+.ipad-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+.content-vis {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 300px;
 }
 
 ::-webkit-scrollbar {

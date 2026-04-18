@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
 
 interface VideoCardProps {
   id: string;
@@ -11,7 +12,7 @@ interface VideoCardProps {
   duration: string;
 }
 
-export default function VideoCard({ id, title, thumbnail, channel, channelAvatar, views, timestamp, duration }: VideoCardProps) {
+const VideoCard = React.memo(function VideoCard({ id, title, thumbnail, channel, channelAvatar, views, timestamp, duration }: VideoCardProps) {
   const navigate = useNavigate();
 
   const navigateToChannel = (e: React.MouseEvent) => {
@@ -21,14 +22,15 @@ export default function VideoCard({ id, title, thumbnail, channel, channelAvatar
   };
 
   return (
-    <Link to={`/video/${id}`} className="flex flex-col gap-3 cursor-pointer group active:opacity-80 md:active:opacity-100 transition-opacity">
-      {/* Battery Optimised Render: Hardware accelerated transforms (transform-gpu), no heavy box-shadows */}
+    <Link to={`/video/${id}`} className="flex flex-col gap-3 cursor-pointer group active:opacity-80 md:active:opacity-100 transition-opacity content-vis">
+      {/* Battery Optimised Render: No VRAM leak from heavy will-change properties */}
       <div className="relative aspect-video rounded-xl overflow-hidden bg-[#222]">
         <img 
           src={thumbnail} 
           alt={title} 
           loading="lazy"
-          className="w-full h-full object-cover rounded-xl group-hover:rounded-none group-hover:scale-105 duration-300 transform-gpu will-change-transform"
+          decoding="async"
+          className="w-full h-full object-cover rounded-xl group-hover:rounded-none group-hover:scale-105 duration-300 transform-gpu"
         />
         <span className="absolute bottom-1.5 right-1.5 bg-black/90 text-[#f1f1f1] text-[12px] font-semibold px-2 py-0.5 rounded shadow-sm">
           {duration}
@@ -61,4 +63,6 @@ export default function VideoCard({ id, title, thumbnail, channel, channelAvatar
       </div>
     </Link>
   );
-}
+});
+
+export default VideoCard;
