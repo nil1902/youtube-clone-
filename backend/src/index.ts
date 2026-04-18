@@ -262,7 +262,7 @@ const frontendBuildPath = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(frontendBuildPath));
 
 // React-Router-DOM Fallback (Redirect all non-api traffic to index.html)
-app.get('*', (req, res) => {
+app.use((req, res, next) => {
   res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
