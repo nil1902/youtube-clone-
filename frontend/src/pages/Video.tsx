@@ -122,7 +122,7 @@ export default function Video() {
           {/* Extremely Low Battery Drain Profile: Let YouTube hardware-accel negotiate resolution natively based on connectivity. No heavy box shadows or DOM layer drops. */}
           <div className="w-full aspect-video bg-black md:rounded-[12px] overflow-hidden relative border-none md:border md:border-[#1a1a1a] transform-gpu shadow-none">
             <iframe 
-              src={`https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&color=white`} 
+              src={`https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&color=white&playsinline=1&enablejsapi=1&fs=0`} 
               title={video.title}
               loading="lazy"
               sandbox="allow-scripts allow-same-origin allow-presentation"
