@@ -1,0 +1,19 @@
+[build]
+  command = "cd backend && npm install && cd ../frontend && npm install && npm run build"
+  publish = "frontend/dist"
+  functions = "backend/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Proxy API requests to the Netlify Serverless Function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/api/:splat"
+  status = 200
+
+# Handle Single Page Application Routing (React-Router-DOM fallback)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
