@@ -1,5 +1,7 @@
 import serverless from 'serverless-http';
 import expressApp from '../src/index';
 
-// Wrap the Express app in a serverless Lambda handler suitable for Netlify Functions
-export const handler = serverless(expressApp);
+// Provide explicit AWS Lambda basePath so Netlify doesn't accidentally pass raw Lambda URIs into Express
+export const handler = serverless(expressApp, {
+  basePath: '/.netlify/functions/api'
+});
