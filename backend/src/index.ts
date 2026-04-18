@@ -5,6 +5,8 @@ import NodeCache from 'node-cache';
 import https from 'https';
 
 const app = express();
+export { app };
+
 app.use(cors());
 app.use(express.json());
 
@@ -246,5 +248,4 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Export the underlying express app for Netlify / Vercel Serverless Wrappers
-export default app;
+// Export nothing by default, we use explicit 'export { app }' at top

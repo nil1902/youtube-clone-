@@ -1,5 +1,4 @@
 import serverless from 'serverless-http';
-import expressApp from '../src/index';
+import { app } from '../src/index';
 
-// Native Serverless wrap
-export const handler = serverless(expressApp);
+export const handler = serverless(app);
