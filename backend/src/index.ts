@@ -23,7 +23,9 @@ const fetchHtml = (url: string): Promise<string> => {
   });
 };
 
-app.get('/api/videos', async (req, res) => {
+const router = express.Router();
+
+router.get('/videos', async (req, res) => {
   try {
     const page = Number(req.query.page) || 1;
     const baseQuery = req.query.q ? String(req.query.q) : 'latest programming tutorials 2024';
@@ -58,19 +60,18 @@ app.get('/api/videos', async (req, res) => {
   }
 });
 
-app.get('/api/shorts', async (req, res) => {
+router.get('/shorts', async (req, res) => {
   try {
     const cacheKey = `shorts_feed_1`;
     if (apiCache.has(cacheKey)) {
       return res.json(apiCache.get(cacheKey));
     }
     
-    // Explicitly search for Shorts queries to grab vertical content
     const shortsQueries = ["#shorts trending", "funny #shorts", "satisfying #shorts viral", "amazing facts #shorts"];
     const r = await yts(shortsQueries[Math.floor(Math.random() * shortsQueries.length)]);
     
     const shorts = r.videos
-      .filter(v => v.type === 'video' && v.seconds < 90) // Enforce Shorts timeframe
+      .filter(v => v.type === 'video' && v.seconds < 90)
       .map(v => ({
       id: v.videoId,
       title: v.title,
@@ -80,7 +81,7 @@ app.get('/api/shorts', async (req, res) => {
       views: v.views >= 1000000 ? (v.views / 1000000).toFixed(1) + 'M' : (v.views >= 1000 ? (v.views / 1000).toFixed(1) + 'K' : v.views)
     }));
 
-    apiCache.set(cacheKey, shorts, 300); // 5 min TTL
+    apiCache.set(cacheKey, shorts, 300);
     res.json(shorts);
   } catch (err) {
     console.error(err);
@@ -88,7 +89,7 @@ app.get('/api/shorts', async (req, res) => {
   }
 });
 
-app.get('/api/videos/:id', async (req, res) => {
+router.get('/videos/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
     const cacheKey = `video_${videoId}`;
@@ -121,7 +122,7 @@ app.get('/api/videos/:id', async (req, res) => {
   }
 });
 
-app.get('/api/channel/:name', async (req, res) => {
+router.get('/channel/:name', async (req, res) => {
   try {
     const channelName = req.params.name;
     const cacheKey = `channel_${channelName.toLowerCase()}`;
@@ -136,26 +137,20 @@ app.get('/api/channel/:name', async (req, res) => {
     let channelVideos = r.videos.filter(v => v.author.name.toLowerCase() === channelName.toLowerCase());
     if (channelVideos.length === 0) channelVideos = r.videos.slice(0, 15);
 
-    // Default Fallbacks
     let trueBanner = "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=2000&q=80";
     let trueDescription = `Official channel for ${channelName}. Subscribe for the latest videos, updates, and community highlights!`;
     let trueVideoCount = channelObject ? `${channelObject.videoCount} videos` : `${Math.floor(Math.random() * 500) + 50} videos`;
     let trueAvatar = channelObject?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(channelName)}&background=random&size=200`;
 
-    // 1000% Authentic Metadata Scraper (bypasses API restrictions by parsing native YouTube variables)
     if (channelObject && channelObject.url) {
       try {
         const html = await fetchHtml(channelObject.url);
-        
-        // Extract Authentic Banner 
         const bannerMatch = html.match(/"banner":\{"thumbnails":\[.*?\{"url":"([^"]+)"/);
         if (bannerMatch && bannerMatch[1]) trueBanner = bannerMatch[1];
         
-        // Extract Authentic Description
         const descMatch = html.match(/"description":\{"simpleText":"(.*?)"\}/);
         if (descMatch && descMatch[1]) trueDescription = descMatch[1].replace(/\\n/g, '\n').replace(/\\u200b/g, '');
 
-        // Extract Video Count if yt-search failed (-1)
         if (channelObject.videoCount === -1) {
            const vcMatch = html.match(/"videoCountText":\{"selected":false,"accessibility":\{"accessibilityData":\{"label":"([^"]+)"\}\}/);
            if (vcMatch && vcMatch[1]) trueVideoCount = vcMatch[1];
@@ -170,7 +165,7 @@ app.get('/api/channel/:name', async (req, res) => {
       title: v.title,
       thumbnail: v.thumbnail,
       channel: v.author.name,
-      channelAvatar: trueAvatar, // Use real extracted avatar
+      channelAvatar: trueAvatar,
       views: v.views >= 1000000 ? (v.views / 1000000).toFixed(1) + 'M' : (v.views >= 1000 ? (v.views / 1000).toFixed(1) + 'K' : v.views),
       timestamp: v.ago,
       duration: v.timestamp
@@ -196,7 +191,7 @@ app.get('/api/channel/:name', async (req, res) => {
   }
 });
 
-app.get('/api/comments/:videoId', (req, res) => {
+router.get('/comments/:videoId', (req, res) => {
   const users = ["TechEnthusiast99", "CodeWarrior_x", "AlexDevOfficial", "FrontendNinja", "RandomViewer102", "Sara_Codes", "DesignMastery", "ReactPro", "JS_Lover", "BackendBoss", "FullStackHero"];
   const texts = [
     "This is an absolute masterpiece. Completely clarified the topic for me in under 10 minutes!",
@@ -238,6 +233,12 @@ app.get('/api/comments/:videoId', (req, res) => {
   const massiveStack = Array.from({ length: 45 }, (_, i) => generateComment(`c_${i}`));
   res.json(massiveStack);
 });
+
+// Bind Router to multiple universal base endpoints so Netlify or Proxy failures ALWAYS catch!
+app.use('/api', router);
+app.use('/.netlify/functions/api', router);
+app.use('/.netlify/functions/api/api', router);
+app.use('/', router);
 
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
