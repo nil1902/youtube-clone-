@@ -55,7 +55,7 @@ export default function Video() {
   const navigate = useNavigate();
   const [video, setVideo] = useState<any>(null);
   const [comments, setComments] = useState<any[]>([]);
-  const [relatedVideos, setRelatedVideos] = useState([]);
+  const [relatedVideos, setRelatedVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
