@@ -20,6 +20,22 @@ export default function Shorts() {
       });
   }, []);
 
+  // Hack: Force Background Playback for Shorts Feed when iOS/Android browser is minimized
+  useEffect(() => {
+    const forceBackgroundPlay = () => {
+      if (document.hidden) {
+        document.querySelectorAll('iframe').forEach(iframe => {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
+          }
+        });
+      }
+    };
+    
+    document.addEventListener("visibilitychange", forceBackgroundPlay);
+    return () => document.removeEventListener("visibilitychange", forceBackgroundPlay);
+  }, []);
+
   if (loading || shorts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-20 mt-14 h-[calc(100vh-60px)] bg-[#0f0f0f]">
@@ -42,7 +58,8 @@ export default function Shorts() {
             
             {/* The Short Video Player */}
             <iframe 
-              src={`https://www.youtube.com/embed/${short.id}?autoplay=${idx === 0 ? 1 : 0}&loop=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1`} 
+              id={`yt-short-${idx}`}
+              src={`https://www.youtube-nocookie.com/embed/${short.id}?autoplay=${idx === 0 ? 1 : 0}&loop=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&fs=0&enablejsapi=1`} 
               className="w-full aspect-[9/16] h-[90%] sm:h-[95%] sm:rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.8)] pointer-events-auto"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             ></iframe>

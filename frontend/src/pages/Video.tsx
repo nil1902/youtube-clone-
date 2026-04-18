@@ -94,6 +94,41 @@ export default function Video() {
       });
   }, [id]);
 
+  // Hack: Force Background Playback via MediaSession OS bridges and Visibility API
+  useEffect(() => {
+    if (!video) return;
+
+    // Register OS-level lock screen metadata so background audio gets prioritized!
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: video.title || 'YouTube Audio',
+        artist: video.channel || 'Channel',
+        artwork: [{ src: video.thumbnail || 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=512', sizes: '512x512', type: 'image/jpeg' }]
+      });
+
+      // Hook lock-screen Play/Pause buttons to the iframe via postMessage!
+      navigator.mediaSession.setActionHandler('play', () => {
+        const iframe = document.getElementById('yt-player') as HTMLIFrameElement;
+        if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        const iframe = document.getElementById('yt-player') as HTMLIFrameElement;
+        if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
+      });
+    }
+
+    // Force iframe to FIGHT browser suspension when user switches tabs!
+    const forceBackgroundPlay = () => {
+      if (document.hidden) {
+        const iframe = document.getElementById('yt-player') as HTMLIFrameElement;
+        if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
+      }
+    };
+    
+    document.addEventListener("visibilitychange", forceBackgroundPlay);
+    return () => document.removeEventListener("visibilitychange", forceBackgroundPlay);
+  }, [video]);
+
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-60px)] text-white mt-14 bg-[#0f0f0f]">
@@ -122,7 +157,8 @@ export default function Video() {
           {/* Extremely Low Battery Drain Profile: Let YouTube hardware-accel negotiate resolution natively based on connectivity. No heavy box shadows or DOM layer drops. */}
           <div className="w-full aspect-video bg-black md:rounded-[12px] overflow-hidden relative border-none md:border md:border-[#1a1a1a] transform-gpu shadow-none">
             <iframe 
-              src={`https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&color=white&playsinline=1&enablejsapi=1&fs=0`} 
+              id="yt-player"
+              src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&color=white&playsinline=1&enablejsapi=1&fs=0`} 
               title={video.title}
               loading="lazy"
               sandbox="allow-scripts allow-same-origin allow-presentation"
